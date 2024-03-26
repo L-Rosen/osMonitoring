@@ -30,7 +30,7 @@ Ensuite, il faut installer les dépendances suivantes:
 - pygal
 
 #Configuration de msmtp
-Pour configurer msmtp, il faut créer un fichier msmtprc	 dans le répertoire /opt/ et y ajouter les lignes suivantes pour utiliser le serveur smtp de l'université:
+Pour configurer msmtp, il faut créer un fichier msmtprc	 dans le répertoire /etc/ et y ajouter les lignes suivantes pour utiliser le serveur smtp de l'université:
 
 account        univ
 auth on
@@ -47,16 +47,18 @@ account default : univ
 #Config.cfg
 Le fichier config.cfg contient les informations de configuration des seuils d'alertes ainsi que l'email de reception des alertes Il contient les informations suivantes:
 [config]
-seuil_cpu=
-seuil_mem=
-mail_alert=
-last_alert=
+seuil_cpu= (seuil d'alerte du processeur en %)
+seuil_mem= (seuil d'alerte de la mémoire en %)
+last_alert= (dernière alerte cert enregistrée a laisser vide , le programme s'occupe de récupérer les infos du moteur de stockage)
+mail_alert= (email de réception des alertes)
 Ne pas modifier last_alert qui est utilisé pour stocker la dernière alerte cert enregistrée.
 
 #crontab
 Pour que le projet fonctionne correctement, il faut ajouter les lignes suivantes dans le fichier crontab:
 */1 * * * * bash /opt/osMonitoring/src/scripts/send_mail.sh
 */1 * * * * /usr/bin/python3 /opt/osMonitoring/src/storage.py
+La première ligne permet de lancer le script qui envoie un mail s'il y a une crise détectée cela toutes les minutes.
+La deuxième ligne permet de lancer le script de stockage des informations de la sonde et la récupération de la dernière alerte cert toutes les minutes.
 
 #Lancement du projet
 Il suffit de lancer web_app.py suivante:
