@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Interface Web</title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <style>
+        #graph {
+            margin-top: 20px;
+        }
+        #navigation-buttons {
+            margin-top: 20px;
+            text-align: center;
+        }
+        .page-link {
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    <div class="container-fluid">
+        <!--En tête de la page qui prend toute la largeur et qui affiche la dernière alerte CERT-->
+        <div class="row mt-3" >
+            <div class="col-lg-12">
+                <div class="alert alert-danger" role="alert" id="cert">
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <!-- Div de gauche qui contient un graphe et un menu déroulant pour configurer les données à afficher -->
+            <div class="col-lg-6">
+                <!-- Canvas pour le graphe -->
+                <div id="graph" class="border rounded">
+                    <svg width="1000" height="500">
+                        <text x="50%" y="50%" text-anchor="middle" font-size="20" fill="black">Chargement...</text>
+                    </svg>
+                </div>
+
+                <!-- Menu déroulant pour configurer les données à afficher -->
+                <div id="menu" class="mt-3">
+                    <form>
+                        <!-- Menu déroulant pour choisir le nombre de données à afficher -->
+                        <div class="form-group">
+                            <label for="data">Nombre de données à afficher :</label>
+                            <select class="form-control" name="data" id="data">
+                                <option value="10">10</option>
+                                <option value="20">20</option>
+                                <option value="30">30</option>
+                                <option value="40">40</option>
+                                <option value="50">50</option>
+                                <option value="60">60</option>
+                                <option value="70">70</option>
+                                <option value="80">80</option>
+                                <option value="90">90</option>
+                                <option value="0">Toutes</option>
+                            </select>
+                        </div>
+                        <!-- Menu déroulant pour choisir le type de données à afficher -->
+                        <div class="form-group">
+                            <label for="type">Type de données à afficher :</label>
+                            <select class="form-control" name="type" id="type">
+                                <option value="cpu_usage">Pourcentage d'utilisation du processeur</option>
+                                <option value="cpu_usage_per_core">Pourcentage d'utilisation de chaque coeur du processeur</option>
+                                <option value="memory_usage">Pourcentage d'utilisation de la mémoire vive</option>
+                                <option value="storage_usage">Pourcentage d'utilisation du disque dur</option>
+                                <option value="connected_users">Nombre d'utilisateur connecté</option>
+                                <option value="process_count">Nombre de processus actifs</option>
+                            </select>
+                        </div>
+                    </form>
+                </div>
+                
+                <!--On affiche toutes les backups sous forme d'un select-->
+                <div id="backups" class="mt-3">
+                    <form>
+                        <div class="form-group">
+                            <label for="backup">Choisir une backup :</label>
+                            <select class="form-control" name="backup" id="backup">
+                                <!--On affiche toutes les backups-->
+                            </select>
+                        </div>
+                        <div class="text-center">
+                            <!-- Bouton pour restaurer une backup -->
+                            <button type="button" class="btn btn-primary" id="restore-button">Restaurer</button>
+                            <!-- Bouton pour sauvegarder -->
+                            <button type="button" class="btn btn-primary" id="backup-button">Sauvegarder</button>
+                            <!--Bouton pour supprimer une backup-->
+                            <button type="button" class="btn btn-danger" id="delete-button">Supprimer</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+            
+            <!-- Div de droite qui contient un tableau avec les données à afficher -->
+            <div class="col-lg-6">
+                <div id="right" class="mt-3">
+                    <div id="table-container">
+                        <table id="data-table" class="table">
+                            <!-- Contenu du tableau généré dynamiquement -->
+                        </table>
+                        <!-- Navigation entre les pages de données -->
+                        <div id="navigation-buttons" class="text-center">
+                            <ul class="pagination">
+                                <li class="page-item" id="prev-button">
+                                    <a class="page-link" aria-label="Précédent">
+                                        <span aria-hidden="true">&laquo;</span>
+                                    </a>
+                                </li>
+                                <li class="page-item disabled"><span class="page-link" id="current-page">1</span></li>
+                                <li class="page-item" id="next-button">
+                                    <a class="page-link" aria-label="Suivant">
+                                        <span aria-hidden="true">&raquo;</span>
+                                    </a>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+</body>
+</html>
+    <script>
+        $(document).ready(function() {
+            var dataPerPage = 10; // Nombre de données par page
+            var currentPage = 1; // Page courante
+
+            // Fonction pour actualiser les données
+            function refreshData() {
+                // Récupérer les données du serveur Flask
+                $.getJSON('/get_data', function(data) {
+                    // Calculer l'index de départ et l'index de fin pour la page courante
+                    var startIndex = (currentPage - 1) * dataPerPage;
+                    var endIndex = startIndex + dataPerPage;
+                    var slicedData = data.slice(startIndex, endIndex);
+
+                    // Mettre à jour le tableau des données dans la div de droite
+                    var table = $('#data-table');
+                    table.empty(); // Effacer le contenu actuel du tableau
+
+                    // Ajouter les en-têtes de colonne
+                    var headers = Object.keys(data[0]);
+                    var headerRow = $('<tr>');
+                    $.each(headers, function(index, header) {
+                        headerRow.append($('<th>').text(header));
+                    });
+                    table.append(headerRow);
+
+                    // Ajouter les lignes de données pour la page courante
+                    $.each(slicedData, function(index, row) {
+                        var dataRow = $('<tr>');
+                        $.each(headers, function(index, header) {
+                            dataRow.append($('<td>').text(row[header]));
+                        });
+                        table.append(dataRow);
+                    });
+
+                    // Gérer l'affichage des boutons de navigation
+                    $('#prev-button').prop('disabled', currentPage === 1);
+                    $('#next-button').prop('disabled', currentPage === 10);
+                    $('#current-page').text(currentPage);
+                });
+            }
+
+            // Fonction pour actualiser le graphe
+            function refreshGraph() {
+                var type = $('#type').val();
+                var nbr = $('#data').val();
+                
+                // Récupérer les données du serveur Flask
+                $.get('/get_graph/'+type+'/'+nbr, function(graphe) {
+                    // Mettre à jour le graphe dans la div de gauche
+                    $('#graph').empty();
+                    $('#graph').append(graphe);
+                });
+               
+            }
+
+            //Fonction pour actualiser les backups
+            function refreshBackups(){
+                $.getJSON('/get_backup_folder_content', function(backups){
+                    //On vide le select
+                    $('#backup').empty();
+                    //On ajoute chaque backup dans le select
+                    $.each(backups, function(index, backup){
+                        $('#backup').append($('<option>').text(backup));
+                    });
+                });
+            }
+
+            //Fonction pour actualiser les alertes
+            function refreshAlerts(){
+                $.getJSON('/get_cert_alert', function(alerts){
+                    //On affiche la dernière alerte CERT de façon jolie et centrée avec les classes de bootstrap
+                    $('#cert').empty();
+                    $('#cert').append('<h4 class="alert-heading text-center">Dernière alerte CERT</h4>');
+                    $('#cert').append('<div class="col text-center"><a href="'+alerts["link"]+'">'+alerts["title"]+'</a></div>');
+                    $('#cert').append('<p class="text-center">'+alerts["pubDate"]+'</p>');
+
+                });
+            }
+            
+
+            // Gestionnaire d'événements pour le changement des options dans le formulaire
+            $('#type, #data').change(function() {
+                refreshGraph();
+            });
+
+            // Gestionnaire d'événements pour les boutons de navigation
+            $('#prev-button').click(function() {
+                if (currentPage > 1) {
+                    currentPage--;
+                    refreshData();
+                }
+            });
+
+            $('#next-button').click(function() {
+                if (currentPage < 10){
+                    currentPage++;
+                    refreshData();
+                }
+            });
+
+            // Gestionnaire d'événements pour le bouton de restauration
+            $('#restore-button').click(function() {
+                var backup = $('#backup').val();
+                if (backup) {
+                    $.get('/restore/'+backup, function(response) {
+                        alert(response);
+                        refreshData();
+                        refreshGraph();
+                    });
+                }
+            });
+
+            // Gestionnaire d'événements pour le bouton de sauvegarde
+            $('#backup-button').click(function() {
+                $.get('/backup', function(response) {
+                    alert(response);
+                    refreshBackups();
+                });
+            });
+
+            //Gestionnaire d'événements pour le bouton de suppression
+            $('#delete-button').click(function() {
+                var backup = $('#backup').val();
+                if (backup) {
+                    $.get('/delete_backup/'+backup, function(response) {
+                        alert(response);
+                        refreshBackups();
+                    });
+                }
+            });
+
+            
+            refreshData();
+            refreshGraph();
+            refreshBackups();
+            refreshAlerts();
+            setInterval(refreshData, 60000);
+            setInterval(refreshGraph, 60000);
+        });
+    </script>
+</body>
+</html>
