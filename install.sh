@@ -11,5 +11,8 @@ sudo bash /opt/osMonitoring/src/scripts/install/setup_config.sh
 echo "Création du service..."
 sudo bash /opt/osMonitoring/src/scripts/install/create_service.sh
 
+echo "Création du dossier /opt/osMonitoring/src/data"
+mkdir /opt/osMonitoring/src/data
+
 #Changement des droits pour pouvoir écrire , lire et exécuter dans le dossier /opt/osMonitoring
 chmod -R 777 /opt/osMonitoring
