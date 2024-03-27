@@ -28,17 +28,7 @@ osMonitoring/
 ```
 ## Installation
 1. Cloner le projet dans le répertoire /opt/ ou copiez les fichiers manuellement dans le répertoire /opt/osMonitoring
-2. Exécuter le script install.sh en tant que root pour installer les dépendances et configurer les services
-3. Configurer le fichier crontab comme indiqué si dessous
-
-## Configuration du crontab
-```
-*/1 * * * * bash /opt/osMonitoring/src/scripts/send_mail.sh
-*/1 * * * * /usr/bin/python3 /opt/osMonitoring/src/storage.py
-```
-
-L'ajout de ces lignes dans le crontab permet de lancer les scripts send_mail.sh et storage.py toutes les minutes.
-Ces derniers permettent respectivement d'envoyer les mails d'alerte et de stocker les données des sondes dans la base de données.
+2. Exécuter le script install.sh en tant que root pour installer les dépendances et configurer les services et le crontab
 
 ## Vérification de l'installation
 Pour vérifier que l'installation s'est bien déroulée, il suffit de se connecter sur la page web http://localhost:5000
@@ -125,6 +115,15 @@ sudo systemctl daemon-reload
 sudo systemctl enable osMonitoring.service
 sudo systemctl start osMonitoring.service
 ```
+
+## Configuration du crontab
+```
+*/1 * * * * bash /opt/osMonitoring/src/scripts/send_mail.sh
+*/1 * * * * /usr/bin/python3 /opt/osMonitoring/src/storage.py
+```
+
+L'ajout de ces lignes dans le crontab permet de lancer les scripts send_mail.sh et storage.py toutes les minutes.
+Ces derniers permettent respectivement d'envoyer les mails d'alerte et de stocker les données des sondes dans la base de données.
 
 # Fontionnement
 
