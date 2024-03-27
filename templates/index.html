@@ -262,6 +262,7 @@
             refreshGraph();
             refreshBackups();
             refreshAlerts();
+            setInterval(refreshAlerts, 60000);
             setInterval(refreshData, 60000);
             setInterval(refreshGraph, 60000);
         });
