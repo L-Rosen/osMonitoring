@@ -31,7 +31,7 @@ osMonitoring/
 2. Exécuter le script install.sh en tant que root pour installer les dépendances et configurer les services
 3. Configurer le fichier crontab comme indiqué si dessous
 
-##Configuration du crontab
+## Configuration du crontab
 ```
 */1 * * * * bash /opt/osMonitoring/src/scripts/send_mail.sh
 */1 * * * * /usr/bin/python3 /opt/osMonitoring/src/storage.py
