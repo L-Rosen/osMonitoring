@@ -156,5 +156,3 @@ Les fichiers suivants collectent les informations nécessaires au monitoring:
 ## Interface web
 - web_app.py : fichier contenant le backend de l'interface web utilisant Flask il apelle les fonctions nécessaires pour afficher les informations sur la page web
 - index.html : fichier contenant le frontend de l'interface web utilisant HTML et CSS il affiche les informations collectées par le backend , le javascript permet de rafraichir les données de la page toutes les 60 secondes
-- (crontab -l 2>/dev/null; echo "*/1 * * * * bash /opt/osMonitoring/src/scripts/send_mail.sh") | crontab -
-(crontab -l 2>/dev/null; echo "*/1 * * * * /usr/bin/python3 /opt/osMonitoring/src/storage.py") | crontab -
