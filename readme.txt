@@ -5,16 +5,17 @@ Arborescence :
     │   ├── backup
     │   ├── backup.sh
     │   ├── restore.sh
-    │   ├── scripts
-    │   │   ├── config.cfg
-    │   │   ├── connected_usr.sh
-    │   │   ├── crisis_detection.sh
-    │   │   ├── generate_graph.py
-    │   │   ├── get_last_cert_alert.py
-    │   │   ├── send_mail.sh
-    │   │   ├── sonde.py
-    │   │   └── disk.py
-    │   └── storage.py
+    │   └── scripts
+    │       ├── config.cfg
+    │       ├── connected_usr.sh
+    │       ├── crisis_detection.sh
+    │       ├── generate_graph.py
+    │       ├── get_last_cert_alert.py
+    │       ├── send_mail.sh
+    │       ├── sonde.py
+    │       └── disk.py
+    |       └── create_service.sh
+    │   
     ├── templates
     │   └── index.html
     └── web_app.py
@@ -44,6 +45,8 @@ password       MOTDEPASSE
 
 account default : univ
 
+Le script d'installation install.sh s'occupe de créer ce fichier et de le configurer automatiquement sinon vous pouvez utilisez setup_msmtp.sh.
+
 #Config.cfg
 Le fichier config.cfg contient les informations de configuration des seuils d'alertes ainsi que l'email de reception des alertes Il contient les informations suivantes:
 [config]
@@ -53,6 +56,8 @@ last_alert= (dernière alerte cert enregistrée a laisser vide , le programme s'
 mail_alert= (email de réception des alertes)
 Ne pas modifier last_alert qui est utilisé pour stocker la dernière alerte cert enregistrée.
 
+Le script d'installation install.sh s'occupe de créer ce fichier et de le configurer automatiquement sinon vous pouvez utilisez setup_config.sh.
+
 #crontab
 Pour que le projet fonctionne correctement, il faut ajouter les lignes suivantes dans le fichier crontab:
 */1 * * * * bash /opt/osMonitoring/src/scripts/send_mail.sh
@@ -60,11 +65,41 @@ Pour que le projet fonctionne correctement, il faut ajouter les lignes suivantes
 La première ligne permet de lancer le script qui envoie un mail s'il y a une crise détectée cela toutes les minutes.
 La deuxième ligne permet de lancer le script de stockage des informations de la sonde et la récupération de la dernière alerte cert toutes les minutes.
 
+Attention le ficheir crontab n'est pas modifié par le script d'installation install.sh, il faut donc ajouter les lignes a la main
+
 #Lancement du projet
 Il suffit de lancer web_app.py suivante:
 python3 web_app.py 
 Le serveur web sera lancé sur le port 5000.
 On peux y accéder via l'adresse http://localhost:5000
+
+Il est préférable d'utiliser un service pour que le serveur web soit lancé en permanence et automatiquement en cas de crash ou de redémarrage.
+Pour ce faire il suffit de créer un fichier de service dans le répertoire /etc/systemd/system/ et d'y ajouter les lignes suivantes:
+[Unit]
+Description=Service de Monitoring
+
+[Service]
+Type=simple
+ 
+User=root
+Group=root
+UMask=007
+ 
+ExecStart=/usr/bin/python3 /opt/osMonitoring/web_app.py
+ 
+Restart=on-failure
+ 
+[Install]
+WantedBy=multi-user.target
+
+Ensuite il suffit de lancer les commandes suivantes:
+systemctl enable monitoring.service
+systemctl daemon-reload
+systemctl start monitoring.service
+Le serveur web sera lancé en permanence et automatiquement en cas de crash ou de redémarrage.
+
+Si le fichier install.sh n'a pas fonctionné, pour créer le service il faut utiliser create_service.sh en tant que root.
+Le fichier create_service.sh permet de de créer le service automatiquement et de le lancer.
 
 #I. Collecte d'informations
 
