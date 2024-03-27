@@ -1,6 +1,6 @@
 # Projet osMonitoring
 ## Arborescence
-
+```
 osMonitoring/
 │   └── install.sh
 ├── README.md
@@ -25,7 +25,7 @@ osMonitoring/
 │   └── templates/
 │       └── index.html
 └── web_app.py
-
+```
 ## Installation
 1. Cloner le projet dans le répertoire /opt/ ou copiez les fichiers manuellement dans le répertoire /opt/osMonitoring
 2. Exécuter le script install.sh en tant que root pour installer les dépendances et configurer les services
