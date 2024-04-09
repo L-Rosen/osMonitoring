@@ -15,7 +15,7 @@ data_file=/opt/osMonitoring/src/data/$(ls -t "/opt/osMonitoring/src/data" | head
 # Utilise grep pour extraire les valeurs cpu_usage, memory_usage et storage_usage du fichier json le plus récent
 cpu_usage=$(grep -oP '"cpu_usage": \K[0-9.]+' "$data_file")
 memory_usage=$(grep -oP '"memory_usage": \K[0-9.]+' "$data_file")
-cert_alert=$(grep -oP '"title": "\K[^"]+' "$data_file")
+cert_alert=$(grep -oP '"title": "\K[^"]+' "/opt/osMonitoring/src/data/CERT.json")
 
 if [[ "$last_alert" != "$cert_alert" ]]; then
     result+="0"
